@@ -16,7 +16,7 @@ variable "ami" {
   
 }
 variable "vm_name" {
-  default = vm-[CHANGE TO YOUR NAME]
+  default = vm-[AlonAlba]
 }
 
 variable "admin_username" {
