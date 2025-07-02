@@ -76,3 +76,17 @@ resource "azurerm_linux_virtual_machine" "vm-ALONALBA" {
 resource "time_sleep" "wait_for_ip" {
   create_duration = "120s"  # Wait for 30 seconds
 }
+
+resource "null_resource" "check_public_id" {
+  provisioner "local-exec" {
+        command = <<EOT
+       if [ -z "${azurerm_public_ip.pip-ALONALBA.ip_address}" ]; then
+     echo "ERROR: Public IP address was not assigned." >&2
+     exit 1
+   fi
+  EOT
+  }        
+ depends_on = [azurerm_public_ip.pip-ALONALBA, time_sleep.wait_for_ip]
+    
+  
+}
