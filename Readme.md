@@ -1,91 +1,45 @@
-# AWS Infrastructure Deployment & Validation Automation
+# AWS Automation & Validation
 
-## Overview
+## What This Project Does
 
-This project automates the process of:
-1. Dynamically generating a Terraform configuration file using **Jinja2**.
-2. Deploying AWS infrastructure that includes:
-   - An **EC2 instance**.
-   - An **Application Load Balancer (ALB)**.
-3. Validating the deployed resources with **boto3** to ensure:
-   - The EC2 instance exists, is in a **running** state, and retrieve its **Public IP**.
-   - The ALB exists and retrieve its **DNS Name**.
-4. Storing the validation data in a structured JSON file.
+This project helps you:
+1. Dynamically generate a Terraform configuration to deploy:
+   - An EC2 instance
+   - An Application Load Balancer (ALB)
+2. Apply the Terraform to actually create the resources on AWS.
+3. Validate that the EC2 and ALB exist and are running, using **boto3**.
+4. Save the validation results in a neat JSON file.
 
 ---
 
-## Project Structure
+## Where Everything Is
 
-All relevant files for this exercise are located under:
-
+You'll find everything you need under:
 workshop/terraform/hands_on_test/
 
 yaml
 Copy
 Edit
 
-### Key Components:
-- `main.py` — Generates the Terraform template based on user input and runs Terraform init, plan, apply.
-- `boto3_validation.py` — Validates the created AWS resources via boto3 and saves the data to a JSON file.
-- `main.tf.j2` — Jinja2 Terraform template file.
-- `aws_validation.json` — The output file containing validation results.
-
 ---
 
-## Instructions to Run
+## How to Run
 
-### 1. Clone the Repository and Switch to the Correct Branch
+### 1. Clone the Repo & Checkout the Right Branch
 ```bash
 git clone <repository-url>
 cd <repository-folder>
 git checkout workshop/terraform
 cd hands_on_test
-2. Configure AWS Credentials
-Make sure your AWS CLI is configured with credentials that have sufficient permissions:
 
-bash
-Copy
-Edit
-aws configure
-3. Install Required Python Packages
-bash
-Copy
-Edit
-pip install boto3 python-terraform Jinja2
-4. Run Terraform Deployment
-Execute the following command to:
-
-Input infrastructure preferences (AMI, instance type, region, AZ, ALB name).
-
-Render and save the Terraform configuration.
-
-Deploy the infrastructure on AWS.
-
-bash
-Copy
-Edit
-python main.py
-5. Validate AWS Resources
-After successful deployment, run:
-
-bash
-Copy
-Edit
-python boto3_validation.py
-This will:
-
-Validate the EC2 instance's existence, state, and public IP.
-
-Validate the ALB existence and DNS name.
-
-Save the validation results into a JSON file named:
-
-pgsql
-Copy
-Edit
 aws_validation.json
-Expected Output
-Example of aws_validation.json:
+It includes:
+The EC2 instance ID
+The instance state (should be running)
+The public IP of the instance
+The DNS name of the ALB
+
+Example:
 
 json
 Copy
@@ -96,28 +50,19 @@ Edit
     "public_ip": "3.92.102.45",
     "load_balancer_dns": "my-alb-123456.elb.amazonaws.com"
 }
-Additionally, logs of the validation process are available in the console and optionally in a log file (aws_validation.log if configured).
-
-Prerequisites
-Python 3.x
+Requirements
+Python 3
 
 Terraform installed
 
-AWS credentials with permissions to:
+AWS credentials with permissions to create:
 
-Create EC2 instances
+EC2 instances
 
-Create Load Balancers
+Load Balancers
 
-Manage VPC, Subnets, and Security Groups
+Security Groups
 
-Summary
-At the end of this workflow you will have:
+VPCs/Subnets (if needed)
 
-Deployed an EC2 instance and ALB on AWS dynamically.
-
-Validated that both resources exist and are accessible.
-
-Generated a JSON file summarizing the validation.
-
-This project demonstrates Infrastructure as Code, automation of deployments, and post-deployment validation on AWS.
+You're all set 🚀.
