@@ -3,15 +3,14 @@ provider "aws" {
 }
 
 variable "region" {
- default = "us-west-1"
+ default = "us-east-1"
 }
 
-variable "subnet" {
- default = "subnet-06acd0b316280afeb" 
-}
+
 variable "ami" {
- default = "ami-061ad72bc140532fd"
+ default = "ami-0150ccaf51ab55a51"
  }
+ 
 variable "vm_name" {
  default = "vm-alonalba"
 }
