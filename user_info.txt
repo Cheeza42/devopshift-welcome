@@ -1,0 +1,3 @@
+GITBRANCH=jenkins-workshop
+GITURL=github.com/Cheeza42/devopshift-welcome.git
+GITUSERNAME=Cheeza42
