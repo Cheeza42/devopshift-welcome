@@ -9,6 +9,27 @@ pipeline {
     }
 
     stages {
+        stage('Build') {
+            steps {
+                echo "Building Volt app in environment: ${env.APP_ENV}"
+                echo "Debug mode is set to: ${env.APP_DEBUG}"
+                // Build steps here
+            }
+        }
+    }
+    
+    stage('Deploy') {
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'my-credentials-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                echo "Deploying with username ${env.USERNAME}"
+                // Use the credentials in your deployment steps
+                sh 'echo $USERNAME'
+                sh 'echo $PASSWORD'
+            }
+        
+        }
+            
+    stages {
         stage('Clone Flask Project') {
             steps {
                 // Use the Git plugin to clone the repository
