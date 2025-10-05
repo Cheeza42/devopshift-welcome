@@ -32,16 +32,7 @@ pipeline {
             }
         }
         
-        stage('Deploy') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'my-credentials-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    echo "Deploying with username ${env.USERNAME}"
-                    // Use the credentials in your deployment steps
-                    sh 'echo $USERNAME'
-                    sh 'echo $PASSWORD'
-                }
-            }
-        }
+
         
         stage('Setup Python Environment and Install Dependencies') {
             steps {
