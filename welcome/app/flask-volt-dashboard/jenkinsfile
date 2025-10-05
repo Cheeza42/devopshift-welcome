@@ -1,33 +1,21 @@
 pipeline {
     agent any
+    parameters {
+        string(name: 'ENV1', defaultValue: '', description: 'Environment variable 1')
+        string(name: 'ENV2', defaultValue: '', description: 'Environment variable 2')
+        string(name: 'DEPLOY_ENV', defaultValue: 'dev', description: 'Deployment environment')
+    }
+
+
 
     environment {
         PYENV_HOME = "${WORKSPACE}/welcome/app/flask-volt-dashboard/.pyenv"
         PROJECT_HOME = "${WORKSPACE}/welcome/app/flask-volt-dashboard"
         FLASK_APP = 'run.py'
         FLASK_ENV = 'development'
+        APP_ENV = "${params.DEPLOY_ENV}"
+        APP_DEBUG = "${params.ENV1}"
     }
-
-    stages {
-        stage('Build') {
-            steps {
-                echo "Building Volt app in environment: ${env.APP_ENV}"
-                echo "Debug mode is set to: ${env.APP_DEBUG}"
-                // Build steps here
-            }
-        }
-    }
-    
-    stage('Deploy') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'my-credentials-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                echo "Deploying with username ${env.USERNAME}"
-                // Use the credentials in your deployment steps
-                sh 'echo $USERNAME'
-                sh 'echo $PASSWORD'
-            }
-        
-        }
 
     stages {
         stage('Clone Flask Project') {
@@ -36,7 +24,25 @@ pipeline {
                 git branch: 'jenkins-workshop', url: 'https://github.com/yanivomc/devopshift-welcome.git'
             }
         }
-
+        stage('Build') {
+            steps {
+                echo "Building Volt app in environment: ${env.APP_ENV}"
+                echo "Debug mode is set to: ${env.APP_DEBUG}"
+                // Build steps here
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'my-credentials-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    echo "Deploying with username ${env.USERNAME}"
+                    // Use the credentials in your deployment steps
+                    sh 'echo $USERNAME'
+                    sh 'echo $PASSWORD'
+                }
+            }
+        }
+        
         stage('Setup Python Environment and Install Dependencies') {
             steps {
                 dir("${PROJECT_HOME}") {
@@ -191,8 +197,7 @@ echo 'Running automated tests...'
             dir("${PROJECT_HOME}") {
                 echo 'Cleaning up workspace...'
                 sh 'rm -rf $PYENV_HOME'
-              }
-          }
-      }
-   }
+            }
+        }
+    }
 }
