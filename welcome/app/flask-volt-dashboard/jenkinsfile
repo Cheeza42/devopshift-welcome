@@ -148,12 +148,12 @@ pipeline {
                             error "Flask application is not running!"
                         } else {
                             echo "Flask application is running successfully."
-                           }  
-                       }
-                   }
-               }
-           }
+                        }  
+                    }
+                }
+            }
         }
+    }
     
     
     stage('Archive Artifacts') {
