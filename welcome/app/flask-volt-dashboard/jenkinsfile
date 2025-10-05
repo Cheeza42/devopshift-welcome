@@ -191,7 +191,8 @@ echo 'Running automated tests...'
             dir("${PROJECT_HOME}") {
                 echo 'Cleaning up workspace...'
                 sh 'rm -rf $PYENV_HOME'
-            }
-        }
-    }
+              }
+          }
+      }
+   }
 }
