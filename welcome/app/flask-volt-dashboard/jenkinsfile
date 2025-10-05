@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        PYENV_HOME = "${WORKSPACE}/welcome/app/flask-volt-dashboard/.pyenv"
+        PYENV_HOME   = "${WORKSPACE}/welcome/app/flask-volt-dashboard/.pyenv"
         PROJECT_HOME = "${WORKSPACE}/welcome/app/flask-volt-dashboard"
-        FLASK_APP = 'run.py'
-        FLASK_ENV = 'development'
+        FLASK_APP    = 'run.py'
+        FLASK_ENV    = 'development'
     }
 
     stages {
@@ -28,9 +28,9 @@ pipeline {
                         fi
 
                         # Delete previously built virtualenv and create a new one
-                        rm -rf $PYENV_HOME
-                        virtualenv $PYENV_HOME
-                        source $PYENV_HOME/bin/activate
+                        rm -rf "$PYENV_HOME"
+                        virtualenv "$PYENV_HOME"
+                        source "$PYENV_HOME/bin/activate"
 
                         # Install required Python packages
                         pip install -r requirements.txt
@@ -46,12 +46,12 @@ pipeline {
                     script {
                         // Run Flask app within the virtual environment
                         sh '''#!/bin/bash
-                        source $PYENV_HOME/bin/activate
-                        tasks=$(pgrep -f "flask run")
+                        source "$PYENV_HOME/bin/activate"
+                        tasks=$(pgrep -f "flask run" || true)
                         if [ -n "$tasks" ]; then
                             echo "Stopping existing Flask application..."
                             for pid in $tasks; do
-                                kill -9 $pid
+                                kill -9 "$pid" || true
                                 echo "Killed process $pid"
                             done
                         fi
@@ -64,23 +64,18 @@ pipeline {
             }
         }
 
-
-
-
-
         stage('Verify Application') {
             steps {
                 dir("${PROJECT_HOME}") {
                     script {
                         // Sleep to allow Flask to start
-                        sleep 5
+                        sleep time: 5, unit: 'SECONDS'
 
                         // Verify Flask application is running
-                        def tasks = sh(script: "pgrep -f 'flask run'", returnStatus: true) ? '' : sh(script: "pgrep -f 'flask run'", returnStdout: true).trim()
-                        if (!tasks) {
-                            // Print error message and show the flask_app.log file content
+                        def status = sh(script: "pgrep -f 'flask run' >/dev/null 2>&1", returnStatus: true)
+                        if (status != 0) {
                             echo "There is a problem with our flask application - printing log below"
-                            sh 'cat flask_app.log'
+                            sh 'test -f flask_app.log && cat flask_app.log || echo "flask_app.log not found"'
                             error "Flask application is not running!"
                         } else {
                             echo "Flask application is running successfully."
@@ -89,6 +84,7 @@ pipeline {
                 }
             }
         }
+
         stage('Parallel Tests') {
             parallel {
                 stage('Test on Chrome') {
@@ -110,31 +106,33 @@ pipeline {
             steps {
                 script {
                     // Wait for user interaction and store the result
-                    def userInput = input message: 'Is the application running successfully? ',
-                                         parameters: [choice(name: 'Proceed', choices: 'Proceed\nAbort', description: 'use the URL: http://REMOTEIP:5001 and Choose an option')]
+                    def userInput = input(
+                        message: 'Is the application running successfully? ',
+                        parameters: [choice(
+                            name: 'Proceed',
+                            choices: 'Proceed\nAbort',
+                            description: 'use the URL: http://REMOTEIP:5001 and Choose an option'
+                        )]
+                    )
                     // Set a variable based on user input
                     env.USER_CHOICE = userInput
                 }
             }
         }
-        stage('Automated Tests') {
-            // Run this stage ONLY! if the user chooses 'Proceed'
 
-            when {
-                expression { env.USER_CHOICE == 'Proceed' }
-            }
+        stage('Automated Tests') {
+            // Run this stage ONLY if the user chooses 'Proceed'
+            when { expression { env.USER_CHOICE == 'Proceed' } }
             steps {
                 script {
-echo 'Running automated tests...'
+                    echo 'Running automated tests...'
                 }
             }
         }
 
         stage('Failed Manual QA Approval') {
             // Run this stage ONLY if the user chooses 'Abort'
-            when {
-                expression { env.USER_CHOICE == 'Abort' }
-            }
+            when { expression { env.USER_CHOICE == 'Abort' } }
             steps {
                 script {
                     error 'Pipeline aborted by the user'
@@ -154,22 +152,21 @@ echo 'Running automated tests...'
                 }
             }
         }
-    
 
         stage('Archive Artifacts') {
             steps {
                 dir("${PROJECT_HOME}") {
                     archiveArtifacts artifacts: 'flask_app.log', allowEmptyArchive: true
-                        }
-                    }
                 }
             }
+        }
+    } // <- END stages
 
     post {
         always {
             dir("${PROJECT_HOME}") {
                 echo 'Cleaning up workspace...'
-                sh 'rm -rf $PYENV_HOME'
+                sh 'rm -rf "$PYENV_HOME"'
             }
         }
     }
