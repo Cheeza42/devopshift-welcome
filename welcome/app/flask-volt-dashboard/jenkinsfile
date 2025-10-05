@@ -114,6 +114,24 @@ pipeline {
             }
         }
 
+        stage('Parallel Tests') {
+              parallel {
+                   stage('Test on Chrome') {
+                        steps {
+                            echo 'Testing VOLT on Chrome...'
+                            // Chrome test steps here
+                      }
+                  }
+                    stage('Test on Firefox') {
+                         steps {
+                            echo 'Testing VOLT on Firefox...'
+                            // Firefox test steps here
+                    }
+                }
+            }
+        }
+    }
+}
         stage('Verify Application') {
             steps {
                 dir("${PROJECT_HOME}") {
@@ -130,13 +148,24 @@ pipeline {
                             error "Flask application is not running!"
                         } else {
                             echo "Flask application is running successfully."
+                           }  
+                       }
+                   }
+               }
+           }
+        }
+    
+    
+    stage('Archive Artifacts') {
+            steps {
+                dir("${PROJECT_HOME}") {
+                    archiveArtifacts artifacts: 'flask_app.log', allowEmptyArchive: true
                         }
                     }
                 }
             }
-        }
-    }
-
+    
+    
     post {
         always {
             dir("${PROJECT_HOME}") {
